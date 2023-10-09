@@ -1,6 +1,10 @@
 [single]
 listeners.bff = {address = "localhost:8090"}
 
+[gke]
+regions = ["us-west1", "us-east2"]
+listeners.boutique = {public_hostname = "transactions-routine.io"}
+
 ["github.com/renanbastos93/transaction-routine/internal/app/Component"]
 Driver = "mysql"
 Source = "root:@tcp(localhost:3306)/transactions"
