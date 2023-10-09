@@ -8,9 +8,29 @@ import (
 )
 
 func (e implBFF) RegisterAccounts(router fiber.Router) {
+	router.Get("/accounts", e.getAllAccounts)
 	router.Post("/accounts", e.createAccount)
 	router.Get("/accounts/:id", e.getAccountById)
+	router.Get("/operations", e.getAllOperations)
 	router.Post("/transactions", e.saveTransaction)
+}
+
+func (e implBFF) getAllAccounts(c *fiber.Ctx) (err error) {
+	out, err := e.app.Get().GetAllUsers(c.Context())
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(out)
+}
+
+func (e implBFF) getAllOperations(c *fiber.Ctx) (err error) {
+	out, err := e.app.Get().GetAllOperations(c.Context())
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, err.Error())
+	}
+
+	return c.Status(fiber.StatusOK).JSON(out)
 }
 
 func (e implBFF) createAccount(c *fiber.Ctx) (err error) {

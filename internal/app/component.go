@@ -17,7 +17,9 @@ import (
 type Component interface {
 	CreateUser(ctx context.Context, in domain.AccountIn) (err error)
 	GetUserById(ctx context.Context, id string) (out domain.AccountOut, err error)
+	GetAllUsers(ctx context.Context) (out domain.AllAccounts, err error)
 	SaveTransaction(ctx context.Context, in domain.TransactionIn) (ok bool, err error)
+	GetAllOperations(ctx context.Context) (out domain.AllOperations, err error)
 	ThereIsOperationTypById(ctx context.Context, id string) (err error)
 }
 
@@ -66,6 +68,22 @@ func (e implapp) GetUserById(ctx context.Context, id string) (out domain.Account
 	}
 
 	return out.FromStore(account), nil
+}
+
+func (e implapp) GetAllUsers(ctx context.Context) (out domain.AllAccounts, err error) {
+	accounts, err := e.db.GetAllAccounts(ctx)
+	if err != nil {
+		return out, err
+	}
+	return out.FromStore(accounts), nil
+}
+
+func (e implapp) GetAllOperations(ctx context.Context) (out domain.AllOperations, err error) {
+	operations, err := e.db.GetAllActiveOperations(ctx)
+	if err != nil {
+		return out, err
+	}
+	return out.FromStore(operations), nil
 }
 
 func (e implapp) SaveTransaction(ctx context.Context, in domain.TransactionIn) (ok bool, err error) {

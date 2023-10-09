@@ -20,10 +20,10 @@ func init() {
 		Iface: reflect.TypeOf((*Component)(nil)).Elem(),
 		Impl:  reflect.TypeOf(implapp{}),
 		LocalStubFn: func(impl any, caller string, tracer trace.Tracer) any {
-			return component_local_stub{impl: impl.(Component), tracer: tracer, createUserMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "CreateUser", Remote: false}), getUserByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetUserById", Remote: false}), saveTransactionMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "SaveTransaction", Remote: false}), thereIsOperationTypByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "ThereIsOperationTypById", Remote: false})}
+			return component_local_stub{impl: impl.(Component), tracer: tracer, createUserMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "CreateUser", Remote: false}), getAllOperationsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetAllOperations", Remote: false}), getAllUsersMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetAllUsers", Remote: false}), getUserByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetUserById", Remote: false}), saveTransactionMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "SaveTransaction", Remote: false}), thereIsOperationTypByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "ThereIsOperationTypById", Remote: false})}
 		},
 		ClientStubFn: func(stub codegen.Stub, caller string) any {
-			return component_client_stub{stub: stub, createUserMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "CreateUser", Remote: true}), getUserByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetUserById", Remote: true}), saveTransactionMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "SaveTransaction", Remote: true}), thereIsOperationTypByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "ThereIsOperationTypById", Remote: true})}
+			return component_client_stub{stub: stub, createUserMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "CreateUser", Remote: true}), getAllOperationsMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetAllOperations", Remote: true}), getAllUsersMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetAllUsers", Remote: true}), getUserByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "GetUserById", Remote: true}), saveTransactionMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "SaveTransaction", Remote: true}), thereIsOperationTypByIdMetrics: codegen.MethodMetricsFor(codegen.MethodLabels{Caller: caller, Component: "github.com/renanbastos93/transaction-routine/internal/app/Component", Method: "ThereIsOperationTypById", Remote: true})}
 		},
 		ServerStubFn: func(impl any, addLoad func(uint64, float64)) codegen.Server {
 			return component_server_stub{impl: impl.(Component), addLoad: addLoad}
@@ -47,6 +47,8 @@ type component_local_stub struct {
 	impl                           Component
 	tracer                         trace.Tracer
 	createUserMetrics              *codegen.MethodMetrics
+	getAllOperationsMetrics        *codegen.MethodMetrics
+	getAllUsersMetrics             *codegen.MethodMetrics
 	getUserByIdMetrics             *codegen.MethodMetrics
 	saveTransactionMetrics         *codegen.MethodMetrics
 	thereIsOperationTypByIdMetrics *codegen.MethodMetrics
@@ -73,6 +75,46 @@ func (s component_local_stub) CreateUser(ctx context.Context, a0 domain.AccountI
 	}
 
 	return s.impl.CreateUser(ctx, a0)
+}
+
+func (s component_local_stub) GetAllOperations(ctx context.Context) (r0 domain.AllOperations, err error) {
+	// Update metrics.
+	begin := s.getAllOperationsMetrics.Begin()
+	defer func() { s.getAllOperationsMetrics.End(begin, err != nil, 0, 0) }()
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		// Create a child span for this method.
+		ctx, span = s.tracer.Start(ctx, "app.Component.GetAllOperations", trace.WithSpanKind(trace.SpanKindInternal))
+		defer func() {
+			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
+			}
+			span.End()
+		}()
+	}
+
+	return s.impl.GetAllOperations(ctx)
+}
+
+func (s component_local_stub) GetAllUsers(ctx context.Context) (r0 domain.AllAccounts, err error) {
+	// Update metrics.
+	begin := s.getAllUsersMetrics.Begin()
+	defer func() { s.getAllUsersMetrics.End(begin, err != nil, 0, 0) }()
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		// Create a child span for this method.
+		ctx, span = s.tracer.Start(ctx, "app.Component.GetAllUsers", trace.WithSpanKind(trace.SpanKindInternal))
+		defer func() {
+			if err != nil {
+				span.RecordError(err)
+				span.SetStatus(codes.Error, err.Error())
+			}
+			span.End()
+		}()
+	}
+
+	return s.impl.GetAllUsers(ctx)
 }
 
 func (s component_local_stub) GetUserById(ctx context.Context, a0 string) (r0 domain.AccountOut, err error) {
@@ -140,6 +182,8 @@ func (s component_local_stub) ThereIsOperationTypById(ctx context.Context, a0 st
 type component_client_stub struct {
 	stub                           codegen.Stub
 	createUserMetrics              *codegen.MethodMetrics
+	getAllOperationsMetrics        *codegen.MethodMetrics
+	getAllUsersMetrics             *codegen.MethodMetrics
 	getUserByIdMetrics             *codegen.MethodMetrics
 	saveTransactionMetrics         *codegen.MethodMetrics
 	thereIsOperationTypByIdMetrics *codegen.MethodMetrics
@@ -198,6 +242,100 @@ func (s component_client_stub) CreateUser(ctx context.Context, a0 domain.Account
 	return
 }
 
+func (s component_client_stub) GetAllOperations(ctx context.Context) (r0 domain.AllOperations, err error) {
+	// Update metrics.
+	var requestBytes, replyBytes int
+	begin := s.getAllOperationsMetrics.Begin()
+	defer func() { s.getAllOperationsMetrics.End(begin, err != nil, requestBytes, replyBytes) }()
+
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		// Create a child span for this method.
+		ctx, span = s.stub.Tracer().Start(ctx, "app.Component.GetAllOperations", trace.WithSpanKind(trace.SpanKindClient))
+	}
+
+	defer func() {
+		// Catch and return any panics detected during encoding/decoding/rpc.
+		if err == nil {
+			err = codegen.CatchPanics(recover())
+			if err != nil {
+				err = errors.Join(weaver.RemoteCallError, err)
+			}
+		}
+
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+
+	}()
+
+	var shardKey uint64
+
+	// Call the remote method.
+	var results []byte
+	results, err = s.stub.Run(ctx, 1, nil, shardKey)
+	replyBytes = len(results)
+	if err != nil {
+		err = errors.Join(weaver.RemoteCallError, err)
+		return
+	}
+
+	// Decode the results.
+	dec := codegen.NewDecoder(results)
+	*(*[]domain.Operation)(&r0) = serviceweaver_dec_slice_Operation_71226fba(dec)
+	err = dec.Error()
+	return
+}
+
+func (s component_client_stub) GetAllUsers(ctx context.Context) (r0 domain.AllAccounts, err error) {
+	// Update metrics.
+	var requestBytes, replyBytes int
+	begin := s.getAllUsersMetrics.Begin()
+	defer func() { s.getAllUsersMetrics.End(begin, err != nil, requestBytes, replyBytes) }()
+
+	span := trace.SpanFromContext(ctx)
+	if span.SpanContext().IsValid() {
+		// Create a child span for this method.
+		ctx, span = s.stub.Tracer().Start(ctx, "app.Component.GetAllUsers", trace.WithSpanKind(trace.SpanKindClient))
+	}
+
+	defer func() {
+		// Catch and return any panics detected during encoding/decoding/rpc.
+		if err == nil {
+			err = codegen.CatchPanics(recover())
+			if err != nil {
+				err = errors.Join(weaver.RemoteCallError, err)
+			}
+		}
+
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
+		span.End()
+
+	}()
+
+	var shardKey uint64
+
+	// Call the remote method.
+	var results []byte
+	results, err = s.stub.Run(ctx, 2, nil, shardKey)
+	replyBytes = len(results)
+	if err != nil {
+		err = errors.Join(weaver.RemoteCallError, err)
+		return
+	}
+
+	// Decode the results.
+	dec := codegen.NewDecoder(results)
+	*(*[]domain.AccountOut)(&r0) = serviceweaver_dec_slice_AccountOut_9f1e6c74(dec)
+	err = dec.Error()
+	return
+}
+
 func (s component_client_stub) GetUserById(ctx context.Context, a0 string) (r0 domain.AccountOut, err error) {
 	// Update metrics.
 	var requestBytes, replyBytes int
@@ -240,7 +378,7 @@ func (s component_client_stub) GetUserById(ctx context.Context, a0 string) (r0 d
 	// Call the remote method.
 	requestBytes = len(enc.Data())
 	var results []byte
-	results, err = s.stub.Run(ctx, 1, enc.Data(), shardKey)
+	results, err = s.stub.Run(ctx, 3, enc.Data(), shardKey)
 	replyBytes = len(results)
 	if err != nil {
 		err = errors.Join(weaver.RemoteCallError, err)
@@ -291,7 +429,7 @@ func (s component_client_stub) SaveTransaction(ctx context.Context, a0 domain.Tr
 	// Call the remote method.
 	requestBytes = len(enc.Data())
 	var results []byte
-	results, err = s.stub.Run(ctx, 2, enc.Data(), shardKey)
+	results, err = s.stub.Run(ctx, 4, enc.Data(), shardKey)
 	replyBytes = len(results)
 	if err != nil {
 		err = errors.Join(weaver.RemoteCallError, err)
@@ -347,7 +485,7 @@ func (s component_client_stub) ThereIsOperationTypById(ctx context.Context, a0 s
 	// Call the remote method.
 	requestBytes = len(enc.Data())
 	var results []byte
-	results, err = s.stub.Run(ctx, 3, enc.Data(), shardKey)
+	results, err = s.stub.Run(ctx, 5, enc.Data(), shardKey)
 	replyBytes = len(results)
 	if err != nil {
 		err = errors.Join(weaver.RemoteCallError, err)
@@ -398,6 +536,10 @@ func (s component_server_stub) GetStubFn(method string) func(ctx context.Context
 	switch method {
 	case "CreateUser":
 		return s.createUser
+	case "GetAllOperations":
+		return s.getAllOperations
+	case "GetAllUsers":
+		return s.getAllUsers
 	case "GetUserById":
 		return s.getUserById
 	case "SaveTransaction":
@@ -429,6 +571,46 @@ func (s component_server_stub) createUser(ctx context.Context, args []byte) (res
 
 	// Encode the results.
 	enc := codegen.NewEncoder()
+	enc.Error(appErr)
+	return enc.Data(), nil
+}
+
+func (s component_server_stub) getAllOperations(ctx context.Context, args []byte) (res []byte, err error) {
+	// Catch and return any panics detected during encoding/decoding/rpc.
+	defer func() {
+		if err == nil {
+			err = codegen.CatchPanics(recover())
+		}
+	}()
+
+	// TODO(rgrandl): The deferred function above will recover from panics in the
+	// user code: fix this.
+	// Call the local method.
+	r0, appErr := s.impl.GetAllOperations(ctx)
+
+	// Encode the results.
+	enc := codegen.NewEncoder()
+	serviceweaver_enc_slice_Operation_71226fba(enc, ([]domain.Operation)(r0))
+	enc.Error(appErr)
+	return enc.Data(), nil
+}
+
+func (s component_server_stub) getAllUsers(ctx context.Context, args []byte) (res []byte, err error) {
+	// Catch and return any panics detected during encoding/decoding/rpc.
+	defer func() {
+		if err == nil {
+			err = codegen.CatchPanics(recover())
+		}
+	}()
+
+	// TODO(rgrandl): The deferred function above will recover from panics in the
+	// user code: fix this.
+	// Call the local method.
+	r0, appErr := s.impl.GetAllUsers(ctx)
+
+	// Encode the results.
+	enc := codegen.NewEncoder()
+	serviceweaver_enc_slice_AccountOut_9f1e6c74(enc, ([]domain.AccountOut)(r0))
 	enc.Error(appErr)
 	return enc.Data(), nil
 }
@@ -521,6 +703,16 @@ func (s component_reflect_stub) CreateUser(ctx context.Context, a0 domain.Accoun
 	return
 }
 
+func (s component_reflect_stub) GetAllOperations(ctx context.Context) (r0 domain.AllOperations, err error) {
+	err = s.caller("GetAllOperations", ctx, []any{}, []any{&r0})
+	return
+}
+
+func (s component_reflect_stub) GetAllUsers(ctx context.Context) (r0 domain.AllAccounts, err error) {
+	err = s.caller("GetAllUsers", ctx, []any{}, []any{&r0})
+	return
+}
+
 func (s component_reflect_stub) GetUserById(ctx context.Context, a0 string) (r0 domain.AccountOut, err error) {
 	err = s.caller("GetUserById", ctx, []any{a0}, []any{&r0})
 	return
@@ -534,4 +726,52 @@ func (s component_reflect_stub) SaveTransaction(ctx context.Context, a0 domain.T
 func (s component_reflect_stub) ThereIsOperationTypById(ctx context.Context, a0 string) (err error) {
 	err = s.caller("ThereIsOperationTypById", ctx, []any{a0}, []any{})
 	return
+}
+
+// Encoding/decoding implementations.
+
+func serviceweaver_enc_slice_Operation_71226fba(enc *codegen.Encoder, arg []domain.Operation) {
+	if arg == nil {
+		enc.Len(-1)
+		return
+	}
+	enc.Len(len(arg))
+	for i := 0; i < len(arg); i++ {
+		(arg[i]).WeaverMarshal(enc)
+	}
+}
+
+func serviceweaver_dec_slice_Operation_71226fba(dec *codegen.Decoder) []domain.Operation {
+	n := dec.Len()
+	if n == -1 {
+		return nil
+	}
+	res := make([]domain.Operation, n)
+	for i := 0; i < n; i++ {
+		(&res[i]).WeaverUnmarshal(dec)
+	}
+	return res
+}
+
+func serviceweaver_enc_slice_AccountOut_9f1e6c74(enc *codegen.Encoder, arg []domain.AccountOut) {
+	if arg == nil {
+		enc.Len(-1)
+		return
+	}
+	enc.Len(len(arg))
+	for i := 0; i < len(arg); i++ {
+		(arg[i]).WeaverMarshal(enc)
+	}
+}
+
+func serviceweaver_dec_slice_AccountOut_9f1e6c74(dec *codegen.Decoder) []domain.AccountOut {
+	n := dec.Len()
+	if n == -1 {
+		return nil
+	}
+	res := make([]domain.AccountOut, n)
+	for i := 0; i < n; i++ {
+		(&res[i]).WeaverUnmarshal(dec)
+	}
+	return res
 }
