@@ -1,0 +1,6 @@
+[single]
+listeners.bff = {address = "localhost:8090"}
+
+["github.com/renanbastos93/transaction-routine/internal/app/Component"]
+Driver = "mysql"
+Source = "root:@tcp(localhost:3306)/transactions"
