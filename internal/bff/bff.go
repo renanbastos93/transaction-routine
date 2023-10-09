@@ -19,7 +19,10 @@ type implBFF struct {
 }
 
 func (e *implBFF) createRouter(ctx context.Context) {
-	router := e.f.Use(logger.New(logger.ConfigDefault))
+	log := logger.New(logger.ConfigDefault)
+	// TODO: add others middleware to ensure security in this service
+
+	router := e.f.Use(log)
 	e.RegisterAccounts(router)
 }
 
