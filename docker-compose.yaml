@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  db:
+    image: mysql:8.0
+    volumes:
+      - db-data:/var/lib/mysql
+      - db-log:/var/log/mysql
+      - ./infra/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./infra/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    hostname: "db-transactions"
+    container_name: db-transactions
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    networks:
+      - transactions-network
+
+networks:
+  transactions-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
+  db-log:
+    driver: local
