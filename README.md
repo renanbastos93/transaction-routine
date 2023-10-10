@@ -7,8 +7,8 @@ This project was developed to solve a job interview problem. In summary, it is a
 ## How to run it
 ```bash
 # Install dependecies
-$ brew install golang-migrate
-$ brew install sqlc
+$ go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+$ go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 $ go install github.com/ServiceWeaver/weaver/cmd/weaver@latest
 $ go install github.com/renanbastos93/boneless/cmd/boneless@latest
 
