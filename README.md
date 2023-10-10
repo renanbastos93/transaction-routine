@@ -20,6 +20,11 @@ $ boneless migrate app up
 
 # Run server
 $ boneless run
+
+# For execute unit tests
+$ make test
+# output in last line: 
+# total:                                                                          (statements)            64.7%
 ```
 
 ## Driagram
