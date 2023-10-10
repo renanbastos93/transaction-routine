@@ -50,12 +50,7 @@ func (e implBFF) createAccount(c *fiber.Ctx) (err error) {
 }
 
 func (e implBFF) getAccountById(c *fiber.Ctx) (err error) {
-	id := c.Params("id")
-	if id == "" {
-		return fiber.ErrBadRequest
-	}
-
-	out, err := e.app.Get().GetUserById(c.Context(), id)
+	out, err := e.app.Get().GetUserById(c.Context(), c.Params("id"))
 	if err != nil {
 		return fiber.NewError(fiber.StatusNotFound, err.Error())
 	}
