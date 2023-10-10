@@ -13,6 +13,3 @@ test: ## runs unit tests with coverage
 	@go tool cover -func coverage.out | grep total | awk '{print $3}';
 	@go tool cover -html=coverage.out -o coverage.html;
 
-.PHONY: mocks
-mocks: ## generates mocks using mockgen
-	@mockgen -source=./src/app/services/contracts.go -destination=./tests/mocks/mock_saveleadservice.go -package=mocks SaveLeadService
