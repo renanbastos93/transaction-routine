@@ -23,10 +23,13 @@ SELECT * FROM OperationTypes WHERE id=?;
 
 -- name: CreateTransaction :execresult
 INSERT INTO Transactions (
-  id, account_id, operation_type_id, amout, event_date
+  id, account_id, operation_type_id, amout, event_date, balance
 ) VALUES (
-  ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?
 );
+
+-- name: UpdateTransactionById :exec
+UPDATE Transactions SET balance = ? WHERE id = ?;
 
 -- name: GetAllTransactions :many
 SELECT * FROM Transactions;
@@ -42,3 +45,6 @@ SELECT * FROM Transactions WHERE operation_type_id=?;
 
 -- name: GetAllTransactionsByOperationTypeIdAndAccountId :many
 SELECT * FROM Transactions WHERE operation_type_id=? AND account_id=?;
+
+-- name: GetAllTrasactionsNotPaymentByAccountIdAndLessZeroAndEventDateFilter :many
+SELECT * FROM Transactions WHERE account_id=? AND balance < 0 ORDER BY event_date ASC;
