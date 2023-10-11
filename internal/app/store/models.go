@@ -27,4 +27,5 @@ type Transaction struct {
 	OperationTypeID string
 	Amout           sql.NullFloat64
 	EventDate       int64
+	Balance         float64
 }

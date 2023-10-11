@@ -30,9 +30,9 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (s
 
 const createTransaction = `-- name: CreateTransaction :execresult
 INSERT INTO Transactions (
-  id, account_id, operation_type_id, amout, event_date
+  id, account_id, operation_type_id, amout, event_date, balance
 ) VALUES (
-  ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?
 )
 `
 
@@ -42,6 +42,7 @@ type CreateTransactionParams struct {
 	OperationTypeID string
 	Amout           sql.NullFloat64
 	EventDate       int64
+	Balance         float64
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (sql.Result, error) {
@@ -51,6 +52,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.OperationTypeID,
 		arg.Amout,
 		arg.EventDate,
+		arg.Balance,
 	)
 }
 
@@ -128,7 +130,7 @@ func (q *Queries) GetAllActiveOperations(ctx context.Context) ([]Operationtype, 
 }
 
 const getAllTransactions = `-- name: GetAllTransactions :many
-SELECT id, account_id, operation_type_id, amout, event_date FROM Transactions
+SELECT id, account_id, operation_type_id, amout, event_date, balance FROM Transactions
 `
 
 func (q *Queries) GetAllTransactions(ctx context.Context) ([]Transaction, error) {
@@ -146,6 +148,7 @@ func (q *Queries) GetAllTransactions(ctx context.Context) ([]Transaction, error)
 			&i.OperationTypeID,
 			&i.Amout,
 			&i.EventDate,
+			&i.Balance,
 		); err != nil {
 			return nil, err
 		}
@@ -161,7 +164,7 @@ func (q *Queries) GetAllTransactions(ctx context.Context) ([]Transaction, error)
 }
 
 const getAllTransactionsByAccountId = `-- name: GetAllTransactionsByAccountId :many
-SELECT id, account_id, operation_type_id, amout, event_date FROM Transactions WHERE account_id=?
+SELECT id, account_id, operation_type_id, amout, event_date, balance FROM Transactions WHERE account_id=?
 `
 
 func (q *Queries) GetAllTransactionsByAccountId(ctx context.Context, accountID string) ([]Transaction, error) {
@@ -179,6 +182,7 @@ func (q *Queries) GetAllTransactionsByAccountId(ctx context.Context, accountID s
 			&i.OperationTypeID,
 			&i.Amout,
 			&i.EventDate,
+			&i.Balance,
 		); err != nil {
 			return nil, err
 		}
@@ -194,7 +198,7 @@ func (q *Queries) GetAllTransactionsByAccountId(ctx context.Context, accountID s
 }
 
 const getAllTransactionsByOperationTypeId = `-- name: GetAllTransactionsByOperationTypeId :many
-SELECT id, account_id, operation_type_id, amout, event_date FROM Transactions WHERE operation_type_id=?
+SELECT id, account_id, operation_type_id, amout, event_date, balance FROM Transactions WHERE operation_type_id=?
 `
 
 func (q *Queries) GetAllTransactionsByOperationTypeId(ctx context.Context, operationTypeID string) ([]Transaction, error) {
@@ -212,6 +216,7 @@ func (q *Queries) GetAllTransactionsByOperationTypeId(ctx context.Context, opera
 			&i.OperationTypeID,
 			&i.Amout,
 			&i.EventDate,
+			&i.Balance,
 		); err != nil {
 			return nil, err
 		}
@@ -227,7 +232,7 @@ func (q *Queries) GetAllTransactionsByOperationTypeId(ctx context.Context, opera
 }
 
 const getAllTransactionsByOperationTypeIdAndAccountId = `-- name: GetAllTransactionsByOperationTypeIdAndAccountId :many
-SELECT id, account_id, operation_type_id, amout, event_date FROM Transactions WHERE operation_type_id=? AND account_id=?
+SELECT id, account_id, operation_type_id, amout, event_date, balance FROM Transactions WHERE operation_type_id=? AND account_id=?
 `
 
 type GetAllTransactionsByOperationTypeIdAndAccountIdParams struct {
@@ -250,6 +255,41 @@ func (q *Queries) GetAllTransactionsByOperationTypeIdAndAccountId(ctx context.Co
 			&i.OperationTypeID,
 			&i.Amout,
 			&i.EventDate,
+			&i.Balance,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllTrasactionsNotPaymentByAccountIdAndLessZeroAndEventDateFilter = `-- name: GetAllTrasactionsNotPaymentByAccountIdAndLessZeroAndEventDateFilter :many
+SELECT id, account_id, operation_type_id, amout, event_date, balance FROM Transactions WHERE account_id=? AND balance < 0 ORDER BY event_date ASC
+`
+
+func (q *Queries) GetAllTrasactionsNotPaymentByAccountIdAndLessZeroAndEventDateFilter(ctx context.Context, accountID string) ([]Transaction, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTrasactionsNotPaymentByAccountIdAndLessZeroAndEventDateFilter, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Transaction
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.OperationTypeID,
+			&i.Amout,
+			&i.EventDate,
+			&i.Balance,
 		); err != nil {
 			return nil, err
 		}
@@ -293,7 +333,7 @@ func (q *Queries) GetOneOperationById(ctx context.Context, id string) (Operation
 }
 
 const getOneTransactionById = `-- name: GetOneTransactionById :one
-SELECT id, account_id, operation_type_id, amout, event_date FROM Transactions WHERE id=?
+SELECT id, account_id, operation_type_id, amout, event_date, balance FROM Transactions WHERE id=?
 `
 
 func (q *Queries) GetOneTransactionById(ctx context.Context, id string) (Transaction, error) {
@@ -305,6 +345,21 @@ func (q *Queries) GetOneTransactionById(ctx context.Context, id string) (Transac
 		&i.OperationTypeID,
 		&i.Amout,
 		&i.EventDate,
+		&i.Balance,
 	)
 	return i, err
+}
+
+const updateTransactionById = `-- name: UpdateTransactionById :exec
+UPDATE Transactions SET balance = ? WHERE id = ?
+`
+
+type UpdateTransactionByIdParams struct {
+	Balance float64
+	ID      string
+}
+
+func (q *Queries) UpdateTransactionById(ctx context.Context, arg UpdateTransactionByIdParams) error {
+	_, err := q.db.ExecContext(ctx, updateTransactionById, arg.Balance, arg.ID)
+	return err
 }

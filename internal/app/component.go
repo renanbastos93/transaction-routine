@@ -10,6 +10,7 @@ import (
 	"github.com/ServiceWeaver/weaver"
 	"github.com/renanbastos93/transaction-routine/internal/app/domain"
 	"github.com/renanbastos93/transaction-routine/internal/app/store"
+	"github.com/renanbastos93/transaction-routine/pkg/mysql"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -87,7 +88,6 @@ func (e implapp) GetAllOperations(ctx context.Context) (out domain.AllOperations
 }
 
 func (e implapp) SaveTransaction(ctx context.Context, in domain.TransactionIn) (ok bool, err error) {
-	// if compra && saque { save negative number } else {save positive}
 	operationType, err := e.db.GetOneOperationById(ctx, in.OperationTypeID)
 	if err != nil {
 		return ok, ErrNotFoundOperations
@@ -97,18 +97,60 @@ func (e implapp) SaveTransaction(ctx context.Context, in domain.TransactionIn) (
 		return ok, ErrInactiveOperation
 	}
 
+	storageData := in.ToStore()
+
 	switch {
 	case strings.Contains(operationType.Description, domain.OperationCash) || strings.Contains(operationType.Description, domain.OperationWithdrawal):
 		if in.Amout > 0 {
-			in.Amout *= -1
+			storageData.Amout = mysql.NewNullFloat64(in.Amout * -1)
+			storageData.Balance = storageData.Amout.Float64
 		}
+
 	case strings.Contains(operationType.Description, domain.OperationPay):
 		if in.Amout < 0 {
-			in.Amout *= -1
+			storageData.Amout = mysql.NewNullFloat64(in.Amout * -1)
+		}
+
+		transactions, err := e.db.GetAllTrasactionsNotPaymentByAccountIdAndLessZeroAndEventDateFilter(ctx, in.AccountID)
+		if err != nil {
+			return false, fmt.Errorf("cannot filter the last balance")
+		}
+
+		if len(transactions) == 0 {
+			storageData.Balance = storageData.Amout.Float64
+		} else {
+			// TODO: create another func
+			var updateTransactions = make([]store.UpdateTransactionByIdParams, 0, len(transactions))
+			for _, v := range transactions {
+				v.Balance = v.Balance + (v.Balance * -1)
+				storageData.Balance = v.Balance
+
+				params := store.UpdateTransactionByIdParams{
+					ID:      v.ID,
+					Balance: v.Balance,
+				}
+
+				// TODO: we need to improve that
+				if v.Balance > 0 {
+					params.Balance = 0
+				}
+
+				updateTransactions = append(updateTransactions, params)
+			}
+
+			// TODO: create another func
+			go func() {
+				for _, v := range updateTransactions {
+					err := e.db.UpdateTransactionById(ctx, v)
+					if err != nil {
+						fmt.Println("err to update transaction after calculate balance", err.Error())
+					}
+				}
+			}()
 		}
 	}
 
-	_, err = e.db.CreateTransaction(ctx, in.ToStore())
+	_, err = e.db.CreateTransaction(ctx, storageData)
 	if err != nil {
 		return false, err
 	}

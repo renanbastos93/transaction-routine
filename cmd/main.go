@@ -13,3 +13,14 @@ func main() {
 		log.Fatal(err)
 	}
 }
+
+// func main() {
+// 	calc := 0
+// 	a := -1
+// 	b := -3
+
+// 	calc = calc - a
+// 	calc = calc - b
+// 	// (-1) - (-3)
+// 	fmt.Println(calc, -1-3)
+// }
